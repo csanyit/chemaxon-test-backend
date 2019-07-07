@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.HttpClientErrorException;
+import java.nio.charset.Charset;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(value = ChemicalizeProApiController.class, secure = false)
@@ -37,7 +38,7 @@ public class ChemicalizeProApiControllerTest {
     public void testGetDescriptionSummaryWithouthParameterFails() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(GET_DESCRIPTION_SUMMARY_ENDPOINT);
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
-        Assert.assertEquals("{\"message\":\"name query parameter is mandatory\",\"status\":400}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"message\":\"{ \\\"message\\\" : \\\"name query parameter is mandatory\\\"}\",\"status\":400}", result.getResponse().getContentAsString());
         Assert.assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
     }
 
@@ -45,27 +46,28 @@ public class ChemicalizeProApiControllerTest {
     public void testGetDescriptionSummaryWithEmptyParameterFails() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(GET_DESCRIPTION_SUMMARY_ENDPOINT);
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
-        Assert.assertEquals("{\"message\":\"name query parameter is mandatory\",\"status\":400}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"message\":\"{ \\\"message\\\" : \\\"name query parameter is mandatory\\\"}\",\"status\":400}", result.getResponse().getContentAsString());
         Assert.assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
     }
 
     @Test
     public void testGetDescriptionSummaryServiceFailsElementNotFound() throws Exception {
-        Mockito.when(chemicalizeProConnectionService.getChemicalDescriptionSummary(GET_DESCRIPTION_SUMMARY_NAME_PARAMETER)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "null"));
+        HttpClientErrorException httpClientErrorException = new HttpClientErrorException(HttpStatus.NOT_FOUND, "null", "{ \"error\" : \"not found\" }".getBytes(), Charset.forName("UTF-8"));
+        Mockito.when(chemicalizeProConnectionService.getChemicalDescriptionSummary(GET_DESCRIPTION_SUMMARY_NAME_PARAMETER)).thenThrow(httpClientErrorException);
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(GET_DESCRIPTION_SUMMARY_ENDPOINT + GET_DESCRIPTION_SUMMARY_NAME_PARAMETER);
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
         Mockito.verify(chemicalizeProConnectionService, Mockito.times(1)).getChemicalDescriptionSummary(Mockito.eq(GET_DESCRIPTION_SUMMARY_NAME_PARAMETER));
-        Assert.assertEquals("{\"message\":\"404 null\",\"status\":404}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"message\":\"{ \\\"error\\\" : \\\"not found\\\" }\",\"status\":404}", result.getResponse().getContentAsString());
         Assert.assertEquals(HttpStatus.NOT_FOUND.value(), result.getResponse().getStatus());
     }
 
     @Test
     public void testGetDescriptionSummaryServiceFailsWithRuntimeException() throws Exception {
-        Mockito.when(chemicalizeProConnectionService.getChemicalDescriptionSummary(GET_DESCRIPTION_SUMMARY_NAME_PARAMETER)).thenThrow(new RuntimeException("null"));
+        Mockito.when(chemicalizeProConnectionService.getChemicalDescriptionSummary(GET_DESCRIPTION_SUMMARY_NAME_PARAMETER)).thenThrow(new RuntimeException());
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(GET_DESCRIPTION_SUMMARY_ENDPOINT + GET_DESCRIPTION_SUMMARY_NAME_PARAMETER);
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
         Mockito.verify(chemicalizeProConnectionService, Mockito.times(1)).getChemicalDescriptionSummary(Mockito.eq(GET_DESCRIPTION_SUMMARY_NAME_PARAMETER));
-        Assert.assertEquals("{\"message\":\"null\",\"status\":500}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"message\":\"{ \\\"message\\\" : \\\"null\\\"}\",\"status\":500}", result.getResponse().getContentAsString());
         Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getResponse().getStatus());
     }
 

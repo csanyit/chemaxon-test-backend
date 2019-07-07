@@ -36,17 +36,17 @@ public class ChemicalizeProApiController extends ResponseEntityExceptionHandler 
 
     @ExceptionHandler(IllegalArgumentException.class)
     public final ResponseEntity<Map<String, Object>> handleInvalidArgumentExceotion(IllegalArgumentException ex, WebRequest request) {
-        return new ResponseEntity<>(createErrorResponseBody(ex.getMessage(), HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(createErrorResponseBody(String.format("{ \"message\" : \"%s\"}", ex.getMessage()), HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(HttpClientErrorException.class)
     public final ResponseEntity<Map<String, Object>> handleHttpClientErrorException(HttpClientErrorException ex, WebRequest request) {
-        return new ResponseEntity<>(createErrorResponseBody(ex.getMessage(), ex.getStatusCode().value()), ex.getStatusCode());
+        return new ResponseEntity<>(createErrorResponseBody(ex.getResponseBodyAsString(), ex.getStatusCode().value()), ex.getStatusCode());
     }
 
     @ExceptionHandler(Throwable.class)
     public final ResponseEntity<Map<String, Object>> handleAllExceptions(Throwable t, WebRequest request) {
-        return new ResponseEntity<>(createErrorResponseBody(t.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(createErrorResponseBody(String.format("{ \"message\" : \"%s\"}", t.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private static final Map<String, Object> createErrorResponseBody(String exceptionMessage, int statusCode) {
