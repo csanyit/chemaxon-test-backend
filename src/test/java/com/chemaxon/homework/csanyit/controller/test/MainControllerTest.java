@@ -1,7 +1,7 @@
 package com.chemaxon.homework.csanyit.controller.test;
 
 import com.chemaxon.homework.csanyit.controller.MainController;
-import com.chemaxon.homework.csanyit.service.ChemAxonProConnectionService;
+import com.chemaxon.homework.csanyit.service.ChemicalizeProConnectionService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +23,7 @@ public class MainControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ChemAxonProConnectionService chemAxonProConnectionService;
+    private ChemicalizeProConnectionService chemAxonProConnectionService;
 
     @Test
     public void testPingMethod() throws Exception {

@@ -1,6 +1,7 @@
-package com.chemaxon.homework.csanyit.controller.test;
+package com.chemaxon.homework.csanyit.service.test;
 
-import com.chemaxon.homework.csanyit.service.ChemAxonProConnectionService;
+import com.chemaxon.homework.csanyit.service.ChemicalizeProConnectionService;
+import com.chemaxon.homework.csanyit.test.ChemicalizeTestHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,10 +24,10 @@ import java.util.*;
 
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = {
-        "chemaxon.pro.domain=https://api.chemicalize.com",
-        "chemaxon.pro.apikey=TEST_CHEMAXON_PRO_API_KEY"
+        "chemicalize.pro.domain=https://api.chemicalize.com",
+        "chemicalize.pro.apikey=TEST_CHEMICALIZE_PRO_API_KEY"
 })
-public class ChemAxonProConnectionServiceTest {
+public class ChemicalizeProConnectionServiceTest {
 
     private static final String VALID_GET_CHEMICAL_DESCRIPTION_SUMMARY_PARAMETER = "aspirin";
 
@@ -34,32 +35,32 @@ public class ChemAxonProConnectionServiceTest {
     private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
 
     @Autowired
-    private ChemAxonProConnectionService chemAxonProConnectionService;
+    private ChemicalizeProConnectionService chemicalizeProConnectionService;
 
     @Before
     public void setUp() {
-        chemAxonProConnectionService.setRestTemplate(restTemplateMock);
+        chemicalizeProConnectionService.setRestTemplate(restTemplateMock);
     }
 
     @TestConfiguration
-    static class ChemAxonProConnectionServiceTestContextConfiguration {
+    static class ChemicalizeProConnectionServiceTestContextConfiguration {
 
         @Bean
-        public ChemAxonProConnectionService chemAxonProConnectionService() {
-            return new ChemAxonProConnectionService();
+        public ChemicalizeProConnectionService chemicalizeProConnectionService() {
+            return new ChemicalizeProConnectionService();
         }
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testGetChemicalDescriptionSummaryNullParameters() {
-        List resultList = chemAxonProConnectionService.getChemicalDescriptionSummary(null);
+        List resultList = chemicalizeProConnectionService.getChemicalDescriptionSummary(null);
         Assert.assertEquals(Collections.EMPTY_LIST, resultList);
         Mockito.verify(restTemplateMock, Mockito.times(0)).postForObject(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testGetChemicalDescriptionSummaryEmptyParameter() {
-        List resultList = chemAxonProConnectionService.getChemicalDescriptionSummary(null);
+        List resultList = chemicalizeProConnectionService.getChemicalDescriptionSummary(null);
         Assert.assertEquals(Collections.EMPTY_LIST, resultList);
         Mockito.verify(restTemplateMock, Mockito.times(0)).postForObject(Mockito.any(), Mockito.any(), Mockito.any());
     }
@@ -69,14 +70,19 @@ public class ChemAxonProConnectionServiceTest {
         URI calculateUri = new URI("https://api.chemicalize.com/v1/calculate");
         final Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("structure", VALID_GET_CHEMICAL_DESCRIPTION_SUMMARY_PARAMETER);
-        requestBody.put("calculations", Arrays.asList("BASIC"));
+        requestBody.put("calculations", Collections.singletonList("BASIC"));
         final HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        httpHeaders.set("X-Api-Key", "TEST_CHEMAXON_PRO_API_KEY");
-        Mockito.when(restTemplateMock.postForObject(Mockito.eq(calculateUri), Mockito.eq(new HttpEntity<>(requestBody, httpHeaders)), Mockito.eq(List.class))).thenReturn(ChemAxonTestHelper.MOCK_DESCRIPTION_SUMMARY);
-        List resultList = chemAxonProConnectionService.getChemicalDescriptionSummary(VALID_GET_CHEMICAL_DESCRIPTION_SUMMARY_PARAMETER);
-        Assert.assertEquals(ChemAxonTestHelper.MOCK_DESCRIPTION_SUMMARY, resultList);
+        httpHeaders.set("X-Api-Key", "TEST_CHEMICALIZE_PRO_API_KEY");
+        Mockito.when(restTemplateMock.postForObject(Mockito.eq(calculateUri), Mockito.eq(new HttpEntity<>(requestBody, httpHeaders)), Mockito.eq(List.class))).thenReturn(ChemicalizeTestHelper.MOCK_DESCRIPTION_SUMMARY);
+        List resultList = chemicalizeProConnectionService.getChemicalDescriptionSummary(VALID_GET_CHEMICAL_DESCRIPTION_SUMMARY_PARAMETER);
+        Assert.assertEquals(ChemicalizeTestHelper.MOCK_DESCRIPTION_SUMMARY, resultList);
         Mockito.verify(restTemplateMock, Mockito.times(1)).postForObject(Mockito.eq(calculateUri), Mockito.eq(new HttpEntity<>(requestBody, httpHeaders)), Mockito.eq(List.class));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testInitializeFailsIfAPIKeyNotSet() throws URISyntaxException {
+        new ChemicalizeProConnectionService().initialize();
     }
 
 }

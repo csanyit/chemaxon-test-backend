@@ -1,11 +1,11 @@
-package com.chemaxon.homework.csanyit.controller.test;
+package com.chemaxon.homework.csanyit.test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ChemAxonTestHelper {
+public class ChemicalizeTestHelper {
 
     public static final List<Map<String, Object>> MOCK_DESCRIPTION_SUMMARY = new ArrayList<>();
 

@@ -1,6 +1,6 @@
 package com.chemaxon.homework.csanyit.controller;
 
-import com.chemaxon.homework.csanyit.service.ChemAxonProConnectionService;
+import com.chemaxon.homework.csanyit.service.ChemicalizeProConnectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +15,12 @@ import java.util.Map;
 
 @ControllerAdvice
 @RestController
-public class ChemAxonProApiController extends ResponseEntityExceptionHandler {
+public class ChemicalizeProApiController extends ResponseEntityExceptionHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChemAxonProApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChemicalizeProApiController.class);
 
     @Autowired
-    private ChemAxonProConnectionService chemAxonProConnectionService;
+    private ChemicalizeProConnectionService chemicalizeProConnectionService;
 
 
     @GetMapping(MainController.URL + "/description/summary")
@@ -29,7 +29,7 @@ public class ChemAxonProApiController extends ResponseEntityExceptionHandler {
         if ( chemicalName == null || chemicalName.isEmpty() ) {
             throw  new IllegalArgumentException("name query parameter is mandatory");
         }
-        return chemAxonProConnectionService.getChemicalDescriptionSummary(chemicalName);
+        return chemicalizeProConnectionService.getChemicalDescriptionSummary(chemicalName);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -37,25 +37,13 @@ public class ChemAxonProApiController extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(InvalidElementRuntimeException.class)
-    public final ResponseEntity<String> handleInvalidElementRuntimeException(InvalidElementRuntimeException ex, WebRequest request) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(Throwable.class)
     public final ResponseEntity<String> handleAllExceptions(Throwable t, WebRequest request) {
         return new ResponseEntity<>(t.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public void setChemAxonProConnectionService(ChemAxonProConnectionService chemAxonProConnectionService) {
-        this.chemAxonProConnectionService = chemAxonProConnectionService;
+    public void setChemicalizeProConnectionService(ChemicalizeProConnectionService chemicalizeProConnectionService) {
+        this.chemicalizeProConnectionService = chemicalizeProConnectionService;
     }
-
-    public class InvalidElementRuntimeException extends RuntimeException {
-        public InvalidElementRuntimeException(String message) {
-            super(message);
-        }
-    }
-
 
 }
