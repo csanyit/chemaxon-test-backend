@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -35,6 +36,11 @@ public class ChemicalizeProApiController extends ResponseEntityExceptionHandler 
     @ExceptionHandler(IllegalArgumentException.class)
     public final ResponseEntity<String> handleInvalidArgumentExceotion(IllegalArgumentException ex, WebRequest request) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpClientErrorException.class)
+    public final ResponseEntity<String> handleHttpClientErrorException(HttpClientErrorException ex, WebRequest request) {
+        return new ResponseEntity<>(ex.getMessage(), ex.getStatusCode());
     }
 
     @ExceptionHandler(Throwable.class)

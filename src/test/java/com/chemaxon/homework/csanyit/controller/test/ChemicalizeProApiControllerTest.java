@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.client.HttpClientErrorException;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(value = ChemicalizeProApiController.class, secure = false)
@@ -46,6 +47,26 @@ public class ChemicalizeProApiControllerTest {
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
         Assert.assertEquals("name query parameter is mandatory", result.getResponse().getContentAsString());
         Assert.assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
+    }
+
+    @Test
+    public void testGetDescriptionSummaryServiceFailsElementNotFound() throws Exception {
+        Mockito.when(chemicalizeProConnectionService.getChemicalDescriptionSummary(GET_DESCRIPTION_SUMMARY_NAME_PARAMETER)).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "null"));
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(GET_DESCRIPTION_SUMMARY_ENDPOINT + GET_DESCRIPTION_SUMMARY_NAME_PARAMETER);
+        MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+        Mockito.verify(chemicalizeProConnectionService, Mockito.times(1)).getChemicalDescriptionSummary(Mockito.eq(GET_DESCRIPTION_SUMMARY_NAME_PARAMETER));
+        Assert.assertEquals("404 null", result.getResponse().getContentAsString());
+        Assert.assertEquals(HttpStatus.NOT_FOUND.value(), result.getResponse().getStatus());
+    }
+
+    @Test
+    public void testGetDescriptionSummaryServiceFailsWithRuntimeException() throws Exception {
+        Mockito.when(chemicalizeProConnectionService.getChemicalDescriptionSummary(GET_DESCRIPTION_SUMMARY_NAME_PARAMETER)).thenThrow(new RuntimeException("null"));
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.get(GET_DESCRIPTION_SUMMARY_ENDPOINT + GET_DESCRIPTION_SUMMARY_NAME_PARAMETER);
+        MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+        Mockito.verify(chemicalizeProConnectionService, Mockito.times(1)).getChemicalDescriptionSummary(Mockito.eq(GET_DESCRIPTION_SUMMARY_NAME_PARAMETER));
+        Assert.assertEquals("null", result.getResponse().getContentAsString());
+        Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getResponse().getStatus());
     }
 
     @Test
