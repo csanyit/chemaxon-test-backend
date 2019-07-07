@@ -14,6 +14,7 @@
     <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://marvinjs.chemicalize.com/v1/50fdf5c59b7d4699bf380714cd25f7df/client-settings.js"></script>
     <script src="https://marvinjs.chemicalize.com/v1/client.js"></script>
+    <script src="/scripts/functions.js"></script>
 </head>
 <body>
     <header class="App-header">Csanyi Tamas - ChemAxon test</header>
@@ -53,58 +54,13 @@
     </div>
 
     <script>
-    var marvin = null;
-    var currentElement = null;
     $(document).ready(() => {
-      $('#summary_table_head').hide();
-      $('#marvin-display-div').hide();
-      $('#searchButton').prop('disabled', true);
-
-      $('#chemicalname').on('input',function(e){
-        if ($('#chemicalname').val() == '') {
-            $('#searchButton').prop('disabled', true);
-        } else {
-            $('#searchButton').prop('disabled', false);
-        }
-      });
-
+      initializePage();
       $('#searchButton').click(() => {
-        if ( $('#chemicalname').val() != currentElement ) {
-          currentElement = $('#chemicalname').val();
-          $.getJSON("/api/v1/description/summary?name="+$('#chemicalname').val(), result => {
-            if ( result instanceof Array ) {
-              $('#summary_table_head').show();
-              $('#summary_table_chemical_name').html($('#chemicalname').val());
-              $('#summary_table_body').html(result.map( element => {
-                return '<tr><td>'+element.label+'</td><td>'+element.value.toString()+'</td></tr>';
-              }));
-              marvin.importStructure3d();
-              marvin.importStructure3d("name", $('#chemicalname').val());
-              $('#marvin-display-div').show();
-            }
-          }).fail((err) => {
-             console.error(err);
-             $('#summary_table_head').hide();
-             $('#marvin-display-div').hide();
-             $('#summary_table_body').html(
-               '<tr><td><div class="alert alert-danger" role="alert">Error during querying Chemicalize Pro (status '+err.responseJSON.status+'): '+JSON.parse(err.responseJSON.message).message+'</div></td></tr>'
-             );
-          });
-        }
+        searctChemicalDetails($('#chemicalname').val());
       });
 
-      ChemicalizeMarvinJs.createEditor("#marvin-display-div").then( (marvinResult) => {
-        marvinResult.setDisplaySettings({
-            toolbars: "view3d",
-            displayMode: "BALLSTICK",
-            defaultTool: "rotate3d",
-            implicitHydrogen: "OFF",
-            chiralFlagVisible: false,
-            valenceErrorVisible: false,
-            disableContextMenu: true,
-         });
-         marvin = marvinResult;
-      });
+     initializeMarvin();
     });
     </script>
 
